@@ -12,6 +12,16 @@ Run this on the project folder to concatenate the multiple parts of the plugin i
 
 This will generate an `Export to Framer.sketchplugin` file. This file won't be stored in the repo until we get all the issues fixed :)
 
+If you'll be working on the plugin's code, you'll probably want to get the build system working. For that, you need to run this once, after cloning the repo:
+
+    $ sudo gem install bundler
+    $ bundle install --path vendor/bundle
+
+and then, when you want to work on the code, run this:
+
+    $ bundle exec guard -i
+
+This will watch the repo folder, and compile & install the plugin everytime a .js file on the 'src' folder is updated. It'll also announce the fact with a nice voice message :P
 
 ## TODO
 

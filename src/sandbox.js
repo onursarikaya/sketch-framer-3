@@ -5,8 +5,7 @@ if(in_sandbox){
   print("We’re sandboxed: here be dragons")
 }
 
-AppSandbox = function(){
-}
+AppSandbox = function(){ }
 AppSandbox.prototype.authorize = function(path, callback){
   log("AppSandbox.authorize("+path+")")
   var success = false
@@ -37,15 +36,16 @@ AppSandbox.prototype.authorize = function(path, callback){
     log("  " + bookmark)
 
     // Thanks to @joethephish for this pointer (pun totally intended)
-    var bookmarkDataIsStalePtr = MOPointer.alloc().init();
+    var bookmarkDataIsStalePtr = MOPointer.alloc().init()
     var allowedURL = [NSURL URLByResolvingBookmarkData:bookmark
                             options:NSURLBookmarkResolutionWithSecurityScope
                             relativeToURL:nil
                             bookmarkDataIsStale:bookmarkDataIsStalePtr
                             error:{}]
 
-    if(bookmarkDataIsStalePtr.value()){
+    if(bookmarkDataIsStalePtr.value() != 0){
       log("— Bookmark data is stale")
+      log(bookmarkDataIsStalePtr.value())
     }
 
     if(allowedURL) {

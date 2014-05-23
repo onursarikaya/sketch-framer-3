@@ -1,8 +1,8 @@
 # Sketch Framer 3
 
-**BEWARE: This plugin is not yet ready for human consumption.**
+**BEWARE: This plugin is not yet ready for human consumption. It also requires a Sketch version equal or greater than 7876.**
 
-3.0 is the new black. This is the home of v3 of the Sketch Framer plugin, for Sketch 3, to export to Framer 3.
+This is the home of version 3 of the Sketch Framer plugin, for Sketch 3, to export to Framer 3. Yes, 3.0 is the new black.
 
 ## How-to
 
@@ -11,6 +11,8 @@ Run this on the project folder to concatenate the multiple parts of the plugin i
     rake
 
 This will generate an `Export to Framer.sketchplugin` file. This file won't be stored in the repo until we get all the issues fixed :)
+
+Double click the .sketchplugin file to install it. You don't need any other file.
 
 If you'll be working on the plugin's code, you'll probably want to get the build system working. For that, you need to run this once, after cloning the repo:
 
@@ -21,7 +23,10 @@ and then, when you want to work on the code, run this:
 
     $ bundle exec guard -i
 
-This will watch the repo folder, and compile & install the plugin everytime a .js file on the 'src' folder is updated. It'll also announce the fact with a nice voice message :P
+This will watch the repo folder, and compile, install the plugin, and run it everytime a .js file on the 'src' folder is updated. It'll also announce the fact with a nice voice message. It's a good idea to have a sample document open in Sketch for testing, otherwise the plugin will give out an error.
+
+When you're done, just hit `Ctrl + C` on the Terminal window to stop guard.
+
 
 ## TODO
 

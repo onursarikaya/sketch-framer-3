@@ -1,8 +1,3 @@
-// sketch-framer.js
-// ale@bohemiancoding.com
-
-// Setup
-
 // Steps
 function make_export_folder(){
   var path = image_folder()
@@ -59,13 +54,16 @@ function export_assets_for_view(view){
   // Actual writing of asset
   var filename = asset_path_for_view(view),
       slice = [[MSSliceMaker slicesFromExportableLayer:view] firstObject]
-      log(filename)
-      log(slice)
-  slice.page = [[doc currentPage] copyLightweight] // Seems to work in MAS version too?
-  // slice.page = [doc currentPage]
-  var imageData = [MSSliceExporter dataForSlice:slice format:@"png"]
-  [imageData writeToFile:filename atomically:false]
-
+  
+  log("— writing asset " + slice + " to disk: " + filename)
+  
+  slice.page = [[doc currentPage] copyLightweight]
+  slice.format = "png"
+  
+  var imageData = [MSSliceExporter dataForRequest:slice] // This requires Sketch 3.0.3
+  // var imageData = [MSSliceExporter dataForSlice:slice format:"png"] // Works on MAS, only
+  [imageData writeToFile:filename atomically:true]
+  
   // Restore background color for layer
   if(current_artboard != null && did_disable_background){
     [current_artboard setIncludeBackgroundColorInExport:true]
@@ -79,19 +77,6 @@ function export_assets_for_view(view){
     }
   }
 
-}
-function extract_views_from_document(document){
-  // TODO: traverse multiple pages
-  var everything = [[document currentPage] children],
-      views = []
-
-  for (var i = 0; i < [everything count]; i++) {
-    var obj = [everything objectAtIndex:i]
-    if (view_should_be_extracted(obj)) {
-      views.push(obj)
-    }
-  }
-  return views
 }
 function save_structure_to_json(data){
   print("save_structure_to_json()")
@@ -143,6 +128,7 @@ function document_is_saved(){
   return [doc fileURL] != null
 }
 function document_has_artboards(){
+  log("document_has_artboards() — " + ([[[doc currentPage] artboards] count] > 0) )
   return [[[doc currentPage] artboards] count] > 0
 }
 function export_folder(){
@@ -164,14 +150,14 @@ function has_subviews(view){
   return false
 }
 function subviews_for_view(view){
-  // log("subviews_for_view()")
+  log("subviews_for_view()")
   var sublayers = [view layers],
       subviews = []
 
-  log(subviews)
+  log("subviews: " + JSON.stringify(subviews))
   for(var v=0; v < [sublayers count]; v++){
     var sublayer = [sublayers objectAtIndex:v]
-    log(sublayer)
+    log("sublayer" + JSON.stringify(sublayer))
     if(view_should_be_extracted(sublayer)){
       subviews.push(sublayer)
     }
@@ -253,12 +239,15 @@ function view_should_be_extracted(view){
   return r
   // return ( [view isMemberOfClass:[MSLayerGroup class]] || is_artboard(view) || [view name].match(/\+/) )
 }
+function say(txt){
+  [[[NSSpeechSynthesizer alloc] initWithVoice:nil] startSpeakingString:txt]
+}
 
 // Classes
 function MetadataExtractor(document){
   this.doc = document
   this.data = []
-  this.views = extract_views_from_document(this.doc)
+  this.views = this.extract_views_from_document()
   this.hideArtboards = false
   this.parse()
 }
@@ -327,6 +316,20 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   // }
 
   return metadata
+}
+MetadataExtractor.prototype.extract_views_from_document = function(){
+  // TODO: traverse multiple pages
+  var document = this.doc
+  var everything = [[document currentPage] children],
+      views = []
+
+  for (var i = 0; i < [everything count]; i++) {
+    var obj = [everything objectAtIndex:i]
+    if (view_should_be_extracted(obj)) {
+      views.push(obj)
+    }
+  }
+  return views
 }
 MetadataExtractor.prototype.parse = function(){
   for (var i = 0; i < this.views.length; i++) {

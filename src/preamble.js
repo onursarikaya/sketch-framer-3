@@ -1,12 +1,21 @@
 // Preamble
-var app = [COScript application:"Sketch"],
-    windows = [app windows]
+// var app = [COScript application:"Sketch"]
+// var doc = [app orderedDocuments][0]
+// var log = print
 
-var log = print
-
-for (var i=0; i<[windows count]; i++) {
-   var window = windows[i]
-   if ([window document]) {
-     var doc = [window document]
-   }
-}
+// Urs Unkler Preamble
+// var doc = doc || null,
+//     app = null,
+//     extern = false;
+// if( doc === null )
+// {
+//     extern = true;
+//     app = JSTalk.application("Sketch");
+//     // app.activate();
+//     doc = app.orderedDocuments()[0];
+//     var selection = doc.selectedLayers();
+// }
+// else
+// {
+//     app = NSApplication.sharedApplication();
+// }

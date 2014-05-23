@@ -5,15 +5,12 @@ guard 'shell' do
   watch(%r{src/.*}) {
     system("rake install")
     system("say installation complete")
-  }
-end
-
-guard :shell do
-  watch(%r{samples/(.*)\.(png)}) {
-    system("say export complete")
+    system("rake run")
   }
 end
 
 # guard :shell do
-#   watch(/.*/) { `git status` }
+#   watch(%r{samples/(.*)\.(png)}) {
+#     system("say export complete")
+#   }
 # end

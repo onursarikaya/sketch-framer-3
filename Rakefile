@@ -9,7 +9,7 @@ end
 
 desc "Run script in Sketch, from coscript"
 task :run => :build do
-  system("bin/coscript src/run.js 2>/dev/null")
+  system("bin/coscript src/run.js")
 end
 
 task :default => :build

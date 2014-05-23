@@ -1,6 +1,6 @@
 # Sketch Framer 3
 
-**BEWARE: This plugin is not yet ready for human consumption. It also requires a Sketch version equal or greater than 7876.**
+**BEWARE: The plugin is not yet ready for human consumption. Also: it requires a Sketch version equal to or greater than 7882.**
 
 This is the home of version 3 of the Sketch Framer plugin, for Sketch 3, to export to Framer 3. Yes, 3.0 is the new black.
 
@@ -13,6 +13,19 @@ Run this on the project folder to concatenate the multiple parts of the plugin i
 This will generate an `Export to Framer.sketchplugin` file. This file won't be stored in the repo until we get all the issues fixed :)
 
 Double click the .sketchplugin file to install it. You don't need any other file.
+
+If you want to run the plugin from the command line, either do:
+
+    rake run
+
+or
+
+    ./export.rb
+
+Both will try to export the frontmost document in Sketch. The second option is there for Koen, basically :)
+
+
+## Development
 
 If you'll be working on the plugin's code, you'll probably want to get the build system working. For that, you need to run this once, after cloning the repo:
 

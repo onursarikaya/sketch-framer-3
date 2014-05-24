@@ -36,5 +36,5 @@ if(error) { // Stop execution and display error
   // var voices = [NSSpeechSynthesizer availableVoices]
   // var speaker = [voices objectAtIndex:Math.floor(Math.random() * [voices count])]
   // var v = [[NSSpeechSynthesizer alloc] initWithVoice:speaker]
-  say("Export complete!")
+  // say("Export complete!")
 }

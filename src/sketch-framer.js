@@ -131,10 +131,35 @@ function document_has_artboards(){
   log("document_has_artboards() — " + ([[[doc currentPage] artboards] count] > 0) )
   return [[[doc currentPage] artboards] count] > 0
 }
+
+function temp_folder(){
+
+  globallyUniqueString = [[NSProcessInfo processInfo] globallyUniqueString];
+  tempDirectoryPath = NSTemporaryDirectory()
+  tempDirectoryPath = [tempDirectoryPath stringByAppendingPathComponent:globallyUniqueString];
+  tempDirectoryPath = [tempDirectoryPath stringByAppendingPathComponent:[doc displayName]];
+  tempDirectoryURL = [NSURL fileURLWithPath:tempDirectoryPath isDirectory:true];
+  [[NSFileManager defaultManager] createDirectoryAtURL:tempDirectoryURL withIntermediateDirectories:true attributes:nil error:nil];
+
+  return tempDirectoryPath;
+}
+
+_temp_path = null;
 function export_folder(){
-  var doc_folder = [[doc fileURL] path].replace([doc displayName], ''),
-      doc_name = [doc displayName].replace(".sketch","")
-  return doc_folder + doc_name + "/"
+  
+  if (!_temp_path){
+    _temp_path = temp_folder();
+
+    // We need this so we can pick up the generated path in the script above
+    print("TEMP_DIR:" + _temp_path);
+  }
+  
+  return _temp_path + "/";
+
+  // var doc_folder = [[doc fileURL] path].replace([doc displayName], ''),
+  //     doc_name = [doc displayName].replace(".sketch","")
+  // return doc_folder + doc_name + "/"
+
 }
 function image_folder(){
   return export_folder() + "images/"

@@ -1,3 +1,6 @@
-// [[[COScript app:"Sketch Beta"] delegate] runPluginScript:"print(doc)"]
-// [[[COScript app:"Sketch Beta"] delegate] runPluginAtURL:[NSURL fileURLWithPath:"Log.sketchplugin"]]
-[[[COScript app:"Sketch Beta"] delegate] runPluginAtURL:[NSURL fileURLWithPath:"Export to Framer.sketchplugin"]]
+scriptData = [NSString stringWithContentsOfFile:"Export to Framer.sketchplugin" encoding:NSUTF8StringEncoding error:nil];
+
+sketchApp = [COScript app:"Sketch Beta"];
+sketchApp = sketchApp || [COScript app:"Sketch"];
+
+[[sketchApp delegate] runPluginScript:scriptData];

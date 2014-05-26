@@ -12,7 +12,7 @@ function make_folder(path){
   [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:true attributes:null error:null]
 }
 function export_assets_for_view(view){
-  // log("export_assets_for_view("+view+")")
+  log("export_assets_for_view("+view+")")
   if (DRY_RUN) {
     log("DRY_RUN, won't export assets")
     return
@@ -43,8 +43,9 @@ function export_assets_for_view(view){
 
     for (var s = 0; s < sublayers.length; s++) {
       var sublayer = sublayers[s]
+      export_assets_for_view(sublayer)
       if ([sublayer isVisible]) {
-        // print("We should hide " + [sublayer name] + ", as it will be exported individually")
+        print("We should hide " + [sublayer name] + ", as it will be exported individually")
         [sublayer setIsVisible:false]
         hidden_children.push(sublayer)
       }
@@ -52,18 +53,19 @@ function export_assets_for_view(view){
   }
 
   // Actual writing of asset
+  // TODO: Use [layer exportOptions]
   var filename = asset_path_for_view(view),
       slice = [[MSSliceMaker slicesFromExportableLayer:view] firstObject]
-  
+
   log("— writing asset " + slice + " to disk: " + filename)
-  
+
   slice.page = [[doc currentPage] copyLightweight]
   slice.format = "png"
-  
+
   var imageData = [MSSliceExporter dataForRequest:slice] // This requires Sketch 3.0.3
   // var imageData = [MSSliceExporter dataForSlice:slice format:"png"] // Works on MAS, only
   [imageData writeToFile:filename atomically:true]
-  
+
   // Restore background color for layer
   if(current_artboard != null && did_disable_background){
     [current_artboard setIncludeBackgroundColorInExport:true]
@@ -146,14 +148,14 @@ function temp_folder(){
 
 _temp_path = null;
 function export_folder(){
-  
+
   if (!_temp_path){
     _temp_path = temp_folder();
 
     // We need this so we can pick up the generated path in the script above
     print("TEMP_DIR:" + _temp_path);
   }
-  
+
   return _temp_path + "/";
 
   // var doc_folder = [[doc fileURL] path].replace([doc displayName], ''),
@@ -340,10 +342,16 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   return metadata
 }
 MetadataExtractor.prototype.extract_views_from_document = function(){
+  var document = this.doc,
+      views = [],
+      everything
+
   // TODO: traverse multiple pages
-  var document = this.doc
-  var everything = [[document currentPage] children],
-      views = []
+  if (document_has_artboards()) {
+    everything = [[document currentPage] artboards]
+  } else {
+    everything = [[document currentPage] layers]
+  }
 
   for (var i = 0; i < [everything count]; i++) {
     var obj = [everything objectAtIndex:i]

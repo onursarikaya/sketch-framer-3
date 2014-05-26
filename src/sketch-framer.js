@@ -264,9 +264,6 @@ function view_should_be_extracted(view){
   return r
   // return ( [view isMemberOfClass:[MSLayerGroup class]] || is_artboard(view) || [view name].match(/\+/) )
 }
-function say(txt){
-  [[[NSSpeechSynthesizer alloc] initWithVoice:nil] startSpeakingString:txt]
-}
 
 // Classes
 function MetadataExtractor(document){

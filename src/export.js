@@ -17,6 +17,7 @@ if(error) { // Stop execution and display error
   new AppSandbox().authorize(home_folder, function(){
     make_export_folder()
     save_structure_to_json(ViewsMetadata)
+    save_structure_to_json_js(ViewsMetadata)
     var views = ViewsMetadata.getViews()
     for (var v = 0; v < views.length; v++) {
       var view = views[v]

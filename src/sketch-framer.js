@@ -84,6 +84,13 @@ function save_structure_to_json(data){
   print("save_structure_to_json()")
   save_file_from_string(export_folder() + "layers.json", data.getJSON())
 }
+function save_structure_to_json_js(data){
+  print("save_structure_to_json_js()")
+  doc_name = [doc displayName].replace(".sketch","")
+  js_json_data  = "window.__imported__ = window.__imported__ || {};\n"
+  js_json_data += "window.__imported__[\"" + doc_name + "/layers.json.js\"] = " + data.getJSON()
+  save_file_from_string(export_folder() + "layers.json.js", js_json_data)
+}
 
 // Utils
 function alert(msg){

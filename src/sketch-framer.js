@@ -36,6 +36,9 @@ function export_assets_for_view(view){
     }
   }
 
+  // Get frame dimensions before hiding children
+  var rect = [view rectByAccountingForStyleSize:[[view absoluteRect] rect]]
+
   // Hide children if they will be exported individually
   if(has_subviews(view)){
     var sublayers = subviews_for_view(view),
@@ -53,17 +56,13 @@ function export_assets_for_view(view){
   }
 
   // Actual writing of asset
-  // TODO: Use [layer exportOptions]
-  var filename = asset_path_for_view(view),
-      slice = [[MSSliceMaker slicesFromExportableLayer:view] firstObject]
-
-  log("— writing asset " + slice + " to disk: " + filename)
-
+  var filename = asset_path_for_view(view)
+  var slice = [[MSSliceMaker slicesFromExportableLayer:view inRect:rect] firstObject]
   slice.page = [[doc currentPage] copyLightweight]
   slice.format = "png"
 
-  var imageData = [MSSliceExporter dataForRequest:slice] // This requires Sketch 3.0.3
-  // var imageData = [MSSliceExporter dataForSlice:slice format:"png"] // Works on MAS, only
+  log("— writing asset " + slice + " to disk: " + filename)
+  var imageData = [MSSliceExporter dataForRequest:slice]
   [imageData writeToFile:filename atomically:true]
 
   // Restore background color for layer
@@ -233,9 +232,10 @@ function mask_bounds(layer){
   }
 }
 function coordinates_for(layer){
-  // print("coordinates_for("+layer+")")
+  print("coordinates_for("+[layer name]+")")
   var frame = [layer frame],
       gkrect = [GKRect rectWithRect:[layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]]],
+      rect2 = [layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]],
       absrect = [layer absoluteRect]
 
   var rulerDeltaX = [absrect rulerX] - [absrect x],
@@ -245,12 +245,17 @@ function coordinates_for(layer){
       x = Math.round(GKRectRulerX),
       y = Math.round(GKRectRulerY)
 
+  var slice = [[MSSliceMaker slicesFromExportableLayer:layer inRect:rect2] firstObject],
+      rect = [slice rect],
+      size = rect.size
+
   return {
     x: x,
     y: y,
-    width:  [gkrect width],
-    height: [gkrect height]
+    width:  0 + size.width,
+    height: 0 + size.height
   }
+
 }
 function msg(msg){
   [doc showMessage:msg]

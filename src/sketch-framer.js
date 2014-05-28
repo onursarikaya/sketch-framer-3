@@ -36,8 +36,12 @@ function export_assets_for_view(view){
     }
   }
 
+  // Hide mask
+  disable_mask_for(view)
+
   // Get frame dimensions before hiding children
   var rect = [view rectByAccountingForStyleSize:[[view absoluteRect] rect]]
+  log(rect)
 
   // Hide children if they will be exported individually
   if(has_subviews(view)){
@@ -78,6 +82,49 @@ function export_assets_for_view(view){
     }
   }
 
+  enable_mask_for(view)
+
+}
+function disable_mask_for(view){
+  log("Disabling mask for " + [view name])
+  var masklayers = [view layers],
+      effective_mask = null
+
+  for (var i = 0; i < [masklayers count]; i++) {
+    var current = [masklayers objectAtIndex:i]
+    if(current && [current hasClippingMask]) {
+      // If a native mask is detected, rename it and disable it (for now) so we can export its contents
+      log("Mask found")
+      var _name = [current name] + "@@mask"
+      [current setName:_name]
+      [current setHasClippingMask:false]
+      [current setIsVisible:false]
+
+      log("Disabling mask " + [current name])
+
+      if (!effective_mask) {
+        // Only the bottom-most one will be effective
+        log("Effective mask " + _name)
+        effective_mask = current
+      }
+    }
+  }
+  // Force redraw, again
+  [view resizeRoot]
+}
+function enable_mask_for(view){
+  log("Shall we re-enable the mask for " + [view name] + "?")
+  var masklayers = [view layers]
+  for (var i = 0; i < [masklayers count]; i++) {
+    var current = [masklayers objectAtIndex:i]
+    if ([current name].indexOf("@@mask") != -1) {
+      var _name = [current name].replace("@@mask", "")
+      log("Re-enabling mask " + _name)
+      [current setHasClippingMask:true]
+      [current setName:_name]
+      [current setIsVisible:true]
+    }
+  }
 }
 function save_structure_to_json(data){
   print("save_structure_to_json()")
@@ -205,6 +252,7 @@ function is_artboard(layer){
   return ([layer className] == "MSArtboardGroup")
 }
 function mask_bounds(layer){
+  log("mask_bounds()")
   var sublayers = [layer layers],
       effective_mask = null
 
@@ -212,14 +260,15 @@ function mask_bounds(layer){
     var current = [sublayers objectAtIndex:i]
     if(current && [current hasClippingMask]) {
       // If a native mask is detected, rename it and disable it (for now) so we can export its contents
+      log("Mask found")
       var _name = [current name] + "@@mask";
       [current setName:_name];
       [current setHasClippingMask:false];
-      print("Disabling mask " + [current name]);
+      log("Disabling mask " + [current name]);
 
       if (!effective_mask) {
         // Only the bottom-most one will be effective
-        print("Effective mask " + _name)
+        log("Effective mask " + _name)
         effective_mask = current
       }
     }
@@ -249,13 +298,19 @@ function coordinates_for(layer){
       rect = [slice rect],
       size = rect.size
 
-  return {
+  var r = {
     x: x,
     y: y,
-    width:  0 + size.width,
+    width: 0 + size.width,
     height: 0 + size.height
   }
 
+  // TODO: fix this so that Artboards are positioned at {0,0}
+  // if (is_artboard(layer)) {
+  //   r.x = 0
+  //   r.y = 0
+  // }
+  return r
 }
 function msg(msg){
   [doc showMessage:msg]
@@ -294,18 +349,18 @@ MetadataExtractor.prototype.getJSON = function(){
   return JSON.stringify(this.data, null, '\t')
 }
 MetadataExtractor.prototype.extract_metadata_from_view = function(view){
-  // log("extract_metadata_from_view("+view+")")
-  // var maskFrame = mask_bounds(view)
-  var maskFrame = null
+  log("extract_metadata_from_view("+view+")")
+
+  var layerFrame = coordinates_for(view)
 
   var metadata = {
     id: "" + [view objectID],
     name: "" + [view name],
-    maskFrame: maskFrame,
-    layerFrame: {},
+    maskFrame: mask_bounds(view),
+    layerFrame: layerFrame,
     image: {
       path: image_path_for_view(view),
-      frame: {}
+      frame: layerFrame
     },
     imageType: "png",
     modification: null
@@ -313,7 +368,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
 
   // Does view have subviews?
   if(has_subviews(view)){
-    // log("View has subviews")
+    log("extract_metadata_from_view() — View has subviews")
     var subviews = subviews_for_view(view),
         children_metadata = []
 
@@ -327,6 +382,24 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   }
 
   // Reset position for artboards:
+  // if (is_artboard(view)) {
+  //   if(this.hideArtboards == false){
+  //     metadata.visible = true
+  //     this.hideArtboards = true
+  //   } else {
+  //     metadata.visible = false
+  //   }
+  //   var frame = [view frame]
+  //   metadata.layerFrame.x = metadata.image.frame.x = 0
+  //   metadata.layerFrame.y = metadata.image.frame.y = 0
+  //   metadata.layerFrame.width = metadata.image.frame.width = [frame width]
+  //   metadata.layerFrame.height = metadata.image.frame.height = [frame height]
+  // } else {
+  //   metadata.visible = [view isVisible] ? true : false
+  //   metadata.layerFrame = metadata.image.frame = coordinates_for(view)
+  // }
+
+  // Set visibility
   if (is_artboard(view)) {
     if(this.hideArtboards == false){
       metadata.visible = true
@@ -334,22 +407,11 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
     } else {
       metadata.visible = false
     }
-    var frame = [view frame]
-    metadata.layerFrame.x = metadata.image.frame.x = 0
-    metadata.layerFrame.y = metadata.image.frame.y = 0
-    metadata.layerFrame.width = metadata.image.frame.width = [frame width]
-    metadata.layerFrame.height = metadata.image.frame.height = [frame height]
   } else {
     metadata.visible = [view isVisible] ? true : false
-    metadata.layerFrame = metadata.image.frame = coordinates_for(view)
   }
 
-  // if ([layer name].indexOf("@@mask") != -1) {
-  //   var _name = [layer name].replace("@@mask", "");
-  //   print("Re-enabling mask " + _name);
-  //   [layer setHasClippingMask:true];
-  //   [layer setName:_name];
-  // }
+  enable_mask_for(view)
 
   return metadata
 }

@@ -201,20 +201,20 @@ function temp_folder(){
 
 _temp_path = null;
 function export_folder(){
+  if(sketch.scriptPath.indexOf("Remote.sketchplugin") != -1){
+    log("We're running from Framer Generator")
+    if (!_temp_path){
+      _temp_path = temp_folder();
 
-  if (!_temp_path){
-    _temp_path = temp_folder();
-
-    // We need this so we can pick up the generated path in the script above
-    print("TEMP_DIR:" + _temp_path);
+      // We need this so we can pick up the generated path in the script above
+      print("TEMP_DIR:" + _temp_path);
+    }
+    return _temp_path + "/";
+  } else {
+    var doc_folder = [[doc fileURL] path].replace([doc displayName], ''),
+        doc_name = [doc displayName].replace(".sketch","")
+    return doc_folder + doc_name + "/"
   }
-
-  return _temp_path + "/";
-
-  // var doc_folder = [[doc fileURL] path].replace([doc displayName], ''),
-  //     doc_name = [doc displayName].replace(".sketch","")
-  // return doc_folder + doc_name + "/"
-
 }
 function image_folder(){
   return export_folder() + "images/"

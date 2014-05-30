@@ -51,8 +51,10 @@ When you're done, just hit `Ctrl + C` on the Terminal window to stop guard.
 - [x] fix random crashes
 - [ ] backport Cemre's mask support
 - [x] Optimization: export all assets in the same sandbox operation?
-- [ ] Export in a tmp folder, and pass it to Framer Generator so it moves the files to the right place
-- [ ] Close issues :)
+- [x] Export in a tmp folder, and pass it to Framer Generator so it moves the files to the right place
+- [x] Layer stacking is wrong? Check align.sketch #7
+- [ ] Fix artboard positions 
+- [ ] Symbol support?
 
 ## Template Format:
 

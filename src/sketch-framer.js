@@ -372,7 +372,8 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
     var subviews = subviews_for_view(view),
         children_metadata = []
 
-    for (var i = 0; i < subviews.length; i++) {
+    // Traverse views in reverse order (see #7)
+    for (var i = subviews.length - 1; i >= 0; i--) {
       var child = subviews[i]
       children_metadata.push(this.extract_metadata_from_view(child))
     }
@@ -427,16 +428,19 @@ MetadataExtractor.prototype.extract_views_from_document = function(){
     everything = [[document currentPage] layers]
   }
 
-  for (var i = 0; i < [everything count]; i++) {
+  // Traverse views in reverse order (see #7)
+  for (var i = [everything count] - 1; i >= 0; i--) {
     var obj = [everything objectAtIndex:i]
     if (view_should_be_extracted(obj)) {
       views.push(obj)
     }
   }
+
   return views
 }
 MetadataExtractor.prototype.parse = function(){
-  for (var i = 0; i < this.views.length; i++) {
+  // Traverse views in reverse order (see #7)
+  for (var i = this.views.length - 1; i >= 0; i--) {
     var v = this.views[i]
     var metadata = this.extract_metadata_from_view(v)
     this.data.push(metadata)

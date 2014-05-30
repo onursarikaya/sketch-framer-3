@@ -12,12 +12,15 @@ task :run => :build do
   system("bin/coscript src/run.js 2>/dev/null")
 end
 
-task :default => :build
-
 desc "Install plugin in all Sketch versions"
 task :install => :build do
   # Sketch Beta & Nightly
   system("cp *.sketchplugin '#{ENV['HOME']}/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
   # Sketch Release
-  # system("cp *.sketchplugin '#{ENV['HOME']}/Library/Containers/com.bohemiancoding.sketch3/Data/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
+  system("cp *.sketchplugin '#{ENV['HOME']}/Library/Containers/com.bohemiancoding.sketch3/Data/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
+  # Framer Generator
+  system("cp *.sketchplugin '/Applications/Framer Generator.app/Contents/Resources/framersketch/'")
+  system("cp src/run.js '/Applications/Framer Generator.app/Contents/Resources/framersketch/'")
 end
+
+task :default => :build

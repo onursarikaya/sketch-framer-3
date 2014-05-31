@@ -220,7 +220,7 @@ function image_folder(){
   return export_folder() + "images/"
 }
 function has_subviews(view){
-  if (last_char([view name]) == "*") {
+  if (do_not_traverse(view)) {
     return false
   }
   var sublayers = [view layers]
@@ -231,6 +231,9 @@ function has_subviews(view){
     }
   }
   return false
+}
+function do_not_traverse(view){
+  return last_char([view name]) == "*"
 }
 function subviews_for_view(view){
   // log("subviews_for_view()")
@@ -316,7 +319,7 @@ function coordinates_for(layer){
   return r
 }
 function last_char(str){
-  str.charAt(str.length() - 1)
+  return str.slice(-1)
 }
 function msg(msg){
   [doc showMessage:msg]
@@ -333,8 +336,17 @@ function save_file_from_string(filename,the_string) {
 
   [str writeToFile:path atomically:false encoding:NSUTF8StringEncoding error:null];
 }
+function view_should_be_ignored(view){
+  return last_char([view name]) == "-"
+}
 function view_should_be_extracted(view){
   var name = [view name]
+  if (view_should_be_ignored(view)) {
+    return false
+  }
+  // if (last_char(name) == "-" || last_char(name) == "*") {
+  //   return false
+  // }
   r = [view className] == "MSLayerGroup" || is_artboard(view) || last_char(name) == "+"
   return r
 }

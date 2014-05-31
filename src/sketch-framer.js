@@ -315,6 +315,9 @@ function coordinates_for(layer){
   // }
   return r
 }
+function last_char(str){
+  str.charAt(str.length() - 1)
+}
 function msg(msg){
   [doc showMessage:msg]
 }
@@ -331,14 +334,14 @@ function save_file_from_string(filename,the_string) {
   [str writeToFile:path atomically:false encoding:NSUTF8StringEncoding error:null];
 }
 function view_should_be_extracted(view){
-  // log("view_should_be_extracted("+view+")")
-  r = [view className] == "MSLayerGroup" || is_artboard(view)
+  var name = [view name]
+  r = [view className] == "MSLayerGroup" || is_artboard(view) || last_char(name) == "+"
   return r
-  // return ( [view isMemberOfClass:[MSLayerGroup class]] || is_artboard(view) || [view name].match(/\+/) )
 }
 
 // Classes
 function MetadataExtractor(document){
+  log("MetadataExtractor")
   this.doc = document
   this.data = []
   this.views = this.extract_views_from_document()

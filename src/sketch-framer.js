@@ -211,15 +211,18 @@ function export_folder(){
     }
     return _temp_path + "/";
   } else {
-    var doc_folder = [[doc fileURL] path].replace([doc displayName], ''),
-        doc_name = [doc displayName].replace(".sketch","")
-    return doc_folder + doc_name + "/"
+    var doc_folder = [[[doc fileURL] URLByDeletingLastPathComponent] path],
+        doc_name = [[[[doc fileURL] path] lastPathComponent] stringByDeletingPathExtension]
+    return doc_folder + "/" +  doc_name + "/"
   }
 }
 function image_folder(){
   return export_folder() + "images/"
 }
 function has_subviews(view){
+  if (last_char([view name]) == "*") {
+    return false
+  }
   var sublayers = [view layers]
   for(var v=0; v < [sublayers count]; v++){
     var sublayer = [sublayers objectAtIndex:v]

@@ -46,11 +46,11 @@ When you're done, just hit `Ctrl + C` on the Terminal window to stop guard.
 - [x] Optimization: export all assets in the same sandbox operation?
 - [x] Export in a tmp folder, and pass it to Framer Generator so it moves the files to the right place
 - [x] Layer stacking is wrong? Check align.sketch #7
-- [ ] Add back keywords:
-  - [ ] **Flatten** To have a group flattened so its child groups don't export individually, append * to its name. Example: Card*. Flattening complex groups will improve performance.
-  - [ ] **Shape/text layers** To export a shape or a text layer as a view, put it in a group, or append + to its name. Otherwise they will export as a background image.
-  - [ ] **Ignore** To ignore a layer, append - to its name. Example: Ignored-
-  - [x] **Hidden layers** Hidden layers in Sketch will be exported as hidden layers in Framer. To show the layer in framer, try view.visible = true
-  - [ ] **Masks** Native masks now work! You can also use Scroll in the name of a group that includes a mask to make that group scrollable.
+- [x] Add back keywords #10
+  - [x] **Flatten** To have a group flattened so its child groups don't export individually, append `*` to its name. Example: `Card*`. Flattening complex groups will improve performance.
+  - [x] **Shape/text layers** To export a shape or a text layer as a view, put it in a group, or append `+` to its name. Otherwise they will export as a background image.
+  - [x] **Ignore** To ignore a layer, append `-` to its name. Example: `Ignored-`
+  - [x] **Hidden layers** Hidden layers in Sketch will be exported as hidden layers in Framer. To show the layer in Framer, try `layer.visible = true`
+- [ ] **Masks** Native masks now work! You can also use Scroll in the name of a group that includes a mask to make that group scrollable. To scroll the layer in Framer, do `layer.scroll = true`
 - [ ] Fix artboard positions
 - [ ] Symbol support?

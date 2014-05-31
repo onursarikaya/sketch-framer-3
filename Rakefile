@@ -14,13 +14,19 @@ end
 
 desc "Install plugin in all Sketch versions"
 task :install => :build do
-  # Sketch Beta & Nightly
-  system("cp *.sketchplugin '#{ENV['HOME']}/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
-  # Sketch Release
-  system("cp *.sketchplugin '#{ENV['HOME']}/Library/Containers/com.bohemiancoding.sketch3/Data/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
-  # Framer Generator
-  system("cp *.sketchplugin '/Applications/Framer Generator.app/Contents/Resources/framersketch/'")
-  system("cp src/run.js '/Applications/Framer Generator.app/Contents/Resources/framersketch/'")
+  if File.exist? "#{ENV['HOME']}/Library/Application Support/com.bohemiancoding.sketch3/Plugins/"
+    puts "Installing in Sketch Beta & Nightly"
+    system("cp *.sketchplugin '#{ENV['HOME']}/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
+  end
+  if File.exist? "#{ENV['HOME']}/Library/Containers/com.bohemiancoding.sketch3/Data/Library/Application Support/com.bohemiancoding.sketch3/Plugins/"
+    puts "Installing in Sketch Release"
+    system("cp *.sketchplugin '#{ENV['HOME']}/Library/Containers/com.bohemiancoding.sketch3/Data/Library/Application Support/com.bohemiancoding.sketch3/Plugins/'")
+  end
+  if File.exist? "/Applications/Framer Generator.app/Contents/Resources/framersketch/"
+    puts "Installing in Framer Generator"
+    system("cp *.sketchplugin '/Applications/Framer Generator.app/Contents/Resources/framersketch/'")
+    system("cp src/run.js '/Applications/Framer Generator.app/Contents/Resources/framersketch/'")
+  end
 end
 
-task :default => :build
+task :default => :install

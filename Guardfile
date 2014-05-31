@@ -3,9 +3,9 @@
 
 guard 'shell' do
   watch(%r{src/.*}) {
-    system("rake install")
+    system("rake")
     system("say installation complete")
-    system("rake run")
+    # system("rake run")
   }
 end
 

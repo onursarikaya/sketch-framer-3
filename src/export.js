@@ -30,7 +30,6 @@ if(error) { // Stop execution and display error
   // error = nil;
   // TODO: cleanup stuff here?
 
-  // All done!
   log("— Export complete!")
   [doc showMessage:"Export Complete"]
 }

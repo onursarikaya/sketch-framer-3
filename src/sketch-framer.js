@@ -182,9 +182,11 @@ function check_for_errors(){
 function document_is_saved(){
   return [doc fileURL] != null
 }
-function document_has_artboards(){
-  log("document_has_artboards() — " + ([[[doc currentPage] artboards] count] > 0) )
-  return [[[doc currentPage] artboards] count] > 0
+
+if ([[[doc currentPage] artboards] count] > 0) {
+  function document_has_artboards(){ return true }
+} else {
+  function document_has_artboards(){ return false }
 }
 
 function temp_folder(){

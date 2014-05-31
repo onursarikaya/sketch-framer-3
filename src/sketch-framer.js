@@ -183,10 +183,8 @@ function document_is_saved(){
   return [doc fileURL] != null
 }
 
-if ([[[doc currentPage] artboards] count] > 0) {
-  function document_has_artboards(){ return true }
-} else {
-  function document_has_artboards(){ return false }
+function document_has_artboards(){
+  return [[[doc currentPage] artboards] count] > 0
 }
 
 function temp_folder(){

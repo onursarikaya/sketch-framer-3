@@ -1,5 +1,7 @@
 log("#####################################################################################################")
 
+var start_time = new Date()
+
 // Some sanity checks, before we begin:
 var error = check_for_errors()
 
@@ -30,6 +32,6 @@ if(error) { // Stop execution and display error
   // error = nil;
   // TODO: cleanup stuff here?
 
-  log("— Export complete!")
+  log("— Export complete in " + (new Date() - start_time) + "ms")
   [doc showMessage:"Export Complete"]
 }

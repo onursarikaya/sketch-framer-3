@@ -4,7 +4,7 @@ function make_export_folder(){
   make_folder(path)
 }
 function make_folder(path){
-  log("make_folder("+path+")")
+  // log("make_folder("+path+")")
   if (DRY_RUN) {
     log("DRY_RUN, won't make folder " + path)
     return
@@ -41,7 +41,6 @@ function export_assets_for_view(view){
 
   // Get frame dimensions before hiding children
   var rect = [view rectByAccountingForStyleSize:[[view absoluteRect] rect]]
-  log(rect)
 
   // Hide children if they will be exported individually
   if(has_subviews(view)){
@@ -52,7 +51,7 @@ function export_assets_for_view(view){
       var sublayer = sublayers[s]
       export_assets_for_view(sublayer)
       if ([sublayer isVisible]) {
-        print("We should hide " + [sublayer name] + ", as it will be exported individually")
+        // print("We should hide " + [sublayer name] + ", as it will be exported individually")
         [sublayer setIsVisible:false]
         hidden_children.push(sublayer)
       }
@@ -86,7 +85,7 @@ function export_assets_for_view(view){
 
 }
 function disable_mask_for(view){
-  log("Disabling mask for " + [view name])
+  // log("Disabling mask for " + [view name])
   var masklayers = [view layers],
       effective_mask = null
 
@@ -94,17 +93,17 @@ function disable_mask_for(view){
     var current = [masklayers objectAtIndex:i]
     if(current && [current hasClippingMask]) {
       // If a native mask is detected, rename it and disable it (for now) so we can export its contents
-      log("Mask found")
+      // log("Mask found")
       var _name = [current name] + "@@mask"
       [current setName:_name]
       [current setHasClippingMask:false]
       [current setIsVisible:false]
 
-      log("Disabling mask " + [current name])
+      // log("Disabling mask " + [current name])
 
       if (!effective_mask) {
         // Only the bottom-most one will be effective
-        log("Effective mask " + _name)
+        // log("Effective mask " + _name)
         effective_mask = current
       }
     }
@@ -113,13 +112,13 @@ function disable_mask_for(view){
   [view resizeRoot]
 }
 function enable_mask_for(view){
-  log("Shall we re-enable the mask for " + [view name] + "?")
+  // log("Shall we re-enable the mask for " + [view name] + "?")
   var masklayers = [view layers]
   for (var i = 0; i < [masklayers count]; i++) {
     var current = [masklayers objectAtIndex:i]
     if ([current name].indexOf("@@mask") != -1) {
       var _name = [current name].replace("@@mask", "")
-      log("Re-enabling mask " + _name)
+      // log("Re-enabling mask " + _name)
       [current setHasClippingMask:true]
       [current setName:_name]
       [current setIsVisible:true]
@@ -127,11 +126,11 @@ function enable_mask_for(view){
   }
 }
 function save_structure_to_json(data){
-  print("save_structure_to_json()")
+  // print("save_structure_to_json()")
   save_file_from_string(export_folder() + "layers.json", data.getJSON())
 }
 function save_structure_to_json_js(data){
-  print("save_structure_to_json_js()")
+  // print("save_structure_to_json_js()")
   doc_name = [doc displayName].replace(".sketch","")
   js_json_data  = "window.__imported__ = window.__imported__ || {};\n"
   js_json_data += "window.__imported__[\"" + doc_name + "/layers.json.js\"] = " + data.getJSON()
@@ -201,8 +200,9 @@ function temp_folder(){
 
 _temp_path = null;
 function export_folder(){
+  // log("export_folder()")
   if(sketch.scriptPath.indexOf("Remote.sketchplugin") != -1){
-    log("We're running from Framer Generator")
+    // log("We're running from Framer Generator")
     if (!_temp_path){
       _temp_path = temp_folder();
 
@@ -233,14 +233,14 @@ function has_subviews(view){
   return false
 }
 function subviews_for_view(view){
-  log("subviews_for_view()")
+  // log("subviews_for_view()")
   var sublayers = [view layers],
       subviews = []
 
-  log("subviews: " + JSON.stringify(subviews))
+  // log("subviews: " + JSON.stringify(subviews))
   for(var v=0; v < [sublayers count]; v++){
     var sublayer = [sublayers objectAtIndex:v]
-    log("sublayer" + JSON.stringify(sublayer))
+    // log("sublayer" + JSON.stringify(sublayer))
     if(view_should_be_extracted(sublayer)){
       subviews.push(sublayer)
     }
@@ -255,7 +255,7 @@ function is_artboard(layer){
   return ([layer className] == "MSArtboardGroup")
 }
 function mask_bounds(layer){
-  log("mask_bounds()")
+  // log("mask_bounds()")
   var sublayers = [layer layers],
       effective_mask = null
 
@@ -263,15 +263,15 @@ function mask_bounds(layer){
     var current = [sublayers objectAtIndex:i]
     if(current && [current hasClippingMask]) {
       // If a native mask is detected, rename it and disable it (for now) so we can export its contents
-      log("Mask found")
+      // log("Mask found")
       var _name = [current name] + "@@mask";
       [current setName:_name];
       [current setHasClippingMask:false];
-      log("Disabling mask " + [current name]);
+      // log("Disabling mask " + [current name]);
 
       if (!effective_mask) {
         // Only the bottom-most one will be effective
-        log("Effective mask " + _name)
+        // log("Effective mask " + _name)
         effective_mask = current
       }
     }
@@ -284,7 +284,7 @@ function mask_bounds(layer){
   }
 }
 function coordinates_for(layer){
-  print("coordinates_for("+[layer name]+")")
+  // print("coordinates_for("+[layer name]+")")
   var frame = [layer frame],
       gkrect = [GKRect rectWithRect:[layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]]],
       rect2 = [layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]],
@@ -355,7 +355,7 @@ MetadataExtractor.prototype.getJSON = function(){
   return JSON.stringify(this.data, null, '\t')
 }
 MetadataExtractor.prototype.extract_metadata_from_view = function(view){
-  log("extract_metadata_from_view("+view+")")
+  log("....MetadataExtractor.extract_metadata_from_view("+[view name]+")")
 
   var layerFrame = coordinates_for(view)
 
@@ -373,8 +373,9 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   }
 
   // Does view have subviews?
+  log(do_not_traverse(view))
   if(has_subviews(view)){
-    log("extract_metadata_from_view() — View has subviews")
+    log("......View has subviews")
     var subviews = subviews_for_view(view),
         children_metadata = []
 
@@ -423,6 +424,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   return metadata
 }
 MetadataExtractor.prototype.extract_views_from_document = function(){
+  log("..MetadataExtractor.extract_views_from_document()")
   var document = this.doc,
       views = [],
       everything
@@ -445,6 +447,7 @@ MetadataExtractor.prototype.extract_views_from_document = function(){
   return views
 }
 MetadataExtractor.prototype.parse = function(){
+  log("..MetadataExtractor.parse()")
   // Traverse views in reverse order (see #7)
   for (var i = this.views.length - 1; i >= 0; i--) {
     var v = this.views[i]

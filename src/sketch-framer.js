@@ -11,120 +11,6 @@ function make_folder(path){
   }
   [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:true attributes:null error:null]
 }
-function export_assets_for_view(view){
-  log("export_assets_for_view("+view+")")
-  if (DRY_RUN) {
-    log("DRY_RUN, won't export assets")
-    return
-  }
-
-  make_folder(folder_path_for_view(view))
-
-  if (document_has_artboards()) {
-    var current_artboard = [view parentArtboard],
-        current_artboard_name = [current_artboard name],
-        did_disable_background = false
-
-    if([current_artboard includeBackgroundColorInExport]){
-      // print("Artboard has a background color set to export")
-      if(!is_artboard(view)){
-        // disable the background color if we're not exporting the actual artboard
-        // print(" so we'll momentarily disable it")
-        [current_artboard setIncludeBackgroundColorInExport:false]
-        did_disable_background = true
-      }
-    }
-  }
-
-  // Hide mask
-  disable_mask_for(view)
-
-  // Get frame dimensions before hiding children
-  var rect = [view rectByAccountingForStyleSize:[[view absoluteRect] rect]]
-
-  // Hide children if they will be exported individually
-  if(has_subviews(view)){
-    var sublayers = subviews_for_view(view),
-        hidden_children = []
-
-    for (var s = 0; s < sublayers.length; s++) {
-      var sublayer = sublayers[s]
-      export_assets_for_view(sublayer)
-      if ([sublayer isVisible]) {
-        // print("We should hide " + [sublayer name] + ", as it will be exported individually")
-        [sublayer setIsVisible:false]
-        hidden_children.push(sublayer)
-      }
-    }
-  }
-
-  // Actual writing of asset
-  var filename = asset_path_for_view(view)
-  var slice = [[MSSliceMaker slicesFromExportableLayer:view inRect:rect] firstObject]
-  slice.page = [[doc currentPage] copyLightweight]
-  slice.format = "png"
-
-  log("— writing asset " + slice + " to disk: " + filename)
-  var imageData = [MSSliceExporter dataForRequest:slice]
-  [imageData writeToFile:filename atomically:true]
-
-  // Restore background color for layer
-  if(current_artboard != null && did_disable_background){
-    [current_artboard setIncludeBackgroundColorInExport:true]
-  }
-
-  // Make sublayers visible again
-  if (has_subviews(view)) {
-    for(var s=0; s < hidden_children.length; s++){
-      var show_me = hidden_children[s]
-      [show_me setIsVisible:true]
-    }
-  }
-
-  enable_mask_for(view)
-
-}
-function disable_mask_for(view){
-  // log("Disabling mask for " + [view name])
-  var masklayers = [view layers],
-      effective_mask = null
-
-  for (var i = 0; i < [masklayers count]; i++) {
-    var current = [masklayers objectAtIndex:i]
-    if(current && [current hasClippingMask]) {
-      // If a native mask is detected, rename it and disable it (for now) so we can export its contents
-      // log("Mask found")
-      var _name = [current name] + "@@mask"
-      [current setName:_name]
-      [current setHasClippingMask:false]
-      [current setIsVisible:false]
-
-      // log("Disabling mask " + [current name])
-
-      if (!effective_mask) {
-        // Only the bottom-most one will be effective
-        // log("Effective mask " + _name)
-        effective_mask = current
-      }
-    }
-  }
-  // Force redraw, again
-  [view resizeRoot]
-}
-function enable_mask_for(view){
-  // log("Shall we re-enable the mask for " + [view name] + "?")
-  var masklayers = [view layers]
-  for (var i = 0; i < [masklayers count]; i++) {
-    var current = [masklayers objectAtIndex:i]
-    if ([current name].indexOf("@@mask") != -1) {
-      var _name = [current name].replace("@@mask", "")
-      // log("Re-enabling mask " + _name)
-      [current setHasClippingMask:true]
-      [current setName:_name]
-      [current setIsVisible:true]
-    }
-  }
-}
 function save_structure_to_json(data){
   // print("save_structure_to_json()")
   save_file_from_string(export_folder() + "layers.json", data.getJSON())
@@ -143,28 +29,6 @@ function alert(msg){
   // alternatively, we could do:
   // [doc showMessage:msg]
   // but maybe that's too subtle for an alert :)
-}
-function asset_path_for_view(view){
-  var r = folder_path_for_view(view) + [view name] + ".png"
-  return r
-}
-function image_path_for_view(view){
-  var r = ""
-  if(document_has_artboards()) {
-    r = "images/" + [[view parentArtboard] name] + "/" + [view name] + ".png"
-  } else {
-    r = "images/" + [view name] + ".png"
-  }
-  return r
-}
-function folder_path_for_view(view){
-  var r = ""
-  if(document_has_artboards()) {
-    r = image_folder() + [[view parentArtboard] name] + "/"
-  } else {
-    r = image_folder()
-  }
-  return r
 }
 function check_for_errors(){
   var errors = []
@@ -219,108 +83,6 @@ function export_folder(){
 function image_folder(){
   return export_folder() + "images/"
 }
-function has_subviews(view){
-  if (do_not_traverse(view)) {
-    return false
-  }
-  var sublayers = [view layers]
-  for(var v=0; v < [sublayers count]; v++){
-    var sublayer = [sublayers objectAtIndex:v]
-    if(view_should_be_extracted(sublayer)){
-      return true
-    }
-  }
-  return false
-}
-function do_not_traverse(view){
-  return last_char([view name]) == "*"
-}
-function subviews_for_view(view){
-  // log("subviews_for_view()")
-  var sublayers = [view layers],
-      subviews = []
-
-  // log("subviews: " + JSON.stringify(subviews))
-  for(var v=0; v < [sublayers count]; v++){
-    var sublayer = [sublayers objectAtIndex:v]
-    // log("sublayer" + JSON.stringify(sublayer))
-    if(view_should_be_extracted(sublayer)){
-      subviews.push(sublayer)
-    }
-  }
-  if (subviews.length > 0) {
-    return subviews
-  } else {
-    return null
-  }
-}
-function is_artboard(layer){
-  return ([layer className] == "MSArtboardGroup")
-}
-function mask_bounds(layer){
-  // log("mask_bounds()")
-  var sublayers = [layer layers],
-      effective_mask = null
-
-  for (var i = 0; i < [sublayers count]; i++) {
-    var current = [sublayers objectAtIndex:i]
-    if(current && [current hasClippingMask]) {
-      // If a native mask is detected, rename it and disable it (for now) so we can export its contents
-      // log("Mask found")
-      var _name = [current name] + "@@mask";
-      [current setName:_name];
-      [current setHasClippingMask:false];
-      // log("Disabling mask " + [current name]);
-
-      if (!effective_mask) {
-        // Only the bottom-most one will be effective
-        // log("Effective mask " + _name)
-        effective_mask = current
-      }
-    }
-  }
-
-  if (effective_mask) {
-    return coordinates_for(effective_mask);
-  } else {
-    return null;
-  }
-}
-function coordinates_for(layer){
-  // print("coordinates_for("+[layer name]+")")
-  var frame = [layer frame],
-      gkrect = [GKRect rectWithRect:[layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]]],
-      rect2 = [layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]],
-      absrect = [layer absoluteRect]
-
-  var rulerDeltaX = [absrect rulerX] - [absrect x],
-      rulerDeltaY = [absrect rulerY] - [absrect y],
-      GKRectRulerX = [gkrect x] + rulerDeltaX,
-      GKRectRulerY = [gkrect y] + rulerDeltaY,
-      x = Math.round(GKRectRulerX),
-      y = Math.round(GKRectRulerY)
-
-  var slice = [[MSSliceMaker slicesFromExportableLayer:layer inRect:rect2] firstObject],
-      rect = [slice rect],
-      size = rect.size
-
-  var r = {
-    x: x,
-    y: y,
-    width: 0 + size.width,
-    height: 0 + size.height
-  }
-
-  // TODO: fix this so that Artboards are positioned at {0,0}
-  // if (is_artboard(layer)) {
-  //   r.x = 0
-  //   r.y = 0
-  // }
-  return r
-}
-function last_char(str){
-  return str.slice(-1)
-}
 function msg(msg){
   [doc showMessage:msg]
 }
@@ -335,20 +97,6 @@ function save_file_from_string(filename,the_string) {
       str = [@"" stringByAppendingString:the_string]
 
   [str writeToFile:path atomically:false encoding:NSUTF8StringEncoding error:null];
-}
-function view_should_be_ignored(view){
-  return last_char([view name]) == "-"
-}
-function view_should_be_extracted(view){
-  var name = [view name]
-  if (view_should_be_ignored(view)) {
-    return false
-  }
-  // if (last_char(name) == "-" || last_char(name) == "*") {
-  //   return false
-  // }
-  r = [view className] == "MSLayerGroup" || is_artboard(view) || last_char(name) == "+"
-  return r
 }
 
 // Classes
@@ -367,17 +115,17 @@ MetadataExtractor.prototype.getJSON = function(){
   return JSON.stringify(this.data, null, '\t')
 }
 MetadataExtractor.prototype.extract_metadata_from_view = function(view){
-  log("....MetadataExtractor.extract_metadata_from_view("+[view name]+")")
+  log("....MetadataExtractor.extract_metadata_from_view(" + view.name + ")")
 
-  var layerFrame = coordinates_for(view)
+  var layerFrame = view.coordinates()
 
   var metadata = {
-    id: "" + [view objectID],
-    name: "" + [view name],
-    maskFrame: mask_bounds(view),
+    id: view.id,
+    name: view.name,
+    maskFrame: view.mask_bounds(),
     layerFrame: layerFrame,
     image: {
-      path: image_path_for_view(view),
+      path: view.image_path(),
       frame: layerFrame
     },
     imageType: "png",
@@ -385,10 +133,9 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   }
 
   // Does view have subviews?
-  log(do_not_traverse(view))
-  if(has_subviews(view)){
+  if(view.has_subviews()){
     log("......View has subviews")
-    var subviews = subviews_for_view(view),
+    var subviews = view.subviews(),
         children_metadata = []
 
     // Traverse views in reverse order (see #7)
@@ -420,7 +167,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   // }
 
   // Set visibility
-  if (is_artboard(view)) {
+  if (view.is_artboard()) {
     if(this.hideArtboards == false){
       metadata.visible = true
       this.hideArtboards = true
@@ -428,10 +175,10 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
       metadata.visible = false
     }
   } else {
-    metadata.visible = [view isVisible] ? true : false
+    metadata.visible = view.visible
   }
 
-  enable_mask_for(view)
+  view.enable_mask()
 
   return metadata
 }
@@ -450,9 +197,9 @@ MetadataExtractor.prototype.extract_views_from_document = function(){
 
   // Traverse views in reverse order (see #7)
   for (var i = [everything count] - 1; i >= 0; i--) {
-    var obj = [everything objectAtIndex:i]
-    if (view_should_be_extracted(obj)) {
-      views.push(obj)
+    var view = new View([everything objectAtIndex:i])
+    if (view.should_be_extracted()) {
+      views.push(view)
     }
   }
 

@@ -23,7 +23,7 @@ if(error) { // Stop execution and display error
     var views = ViewsMetadata.getViews()
     for (var v = 0; v < views.length; v++) {
       var view = views[v]
-      export_assets_for_view(view)
+      view.export_assets()
     }
   })
 

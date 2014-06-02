@@ -252,7 +252,7 @@ View.prototype.export_assets = function(){
   this.disable_mask()
 
   // Get frame dimensions before hiding children
-  var rect = [view rectByAccountingForStyleSize:[[view absoluteRect] rect]]
+  var rect = this.rect_for_export()
 
   // Hide children if they will be exported individually
   if(this.has_subviews()){
@@ -272,12 +272,7 @@ View.prototype.export_assets = function(){
 
   // Actual writing of asset
   var filename = this.asset_path(),
-      slice
-  if(this.is_artboard()){
-    slice = [[MSSliceMaker slicesFromExportableLayer:view inRect:[[view absoluteRect] rect]] firstObject]
-  } else {
-    slice = [[MSSliceMaker slicesFromExportableLayer:view inRect:rect] firstObject]
-  }
+      slice = [[MSSliceMaker slicesFromExportableLayer:view inRect:rect] firstObject]
   slice.page = [[doc currentPage] copyLightweight]
   slice.format = "png"
 
@@ -299,4 +294,15 @@ View.prototype.export_assets = function(){
   }
 
   this.enable_mask()
+}
+
+View.prototype.rect_for_export = function(){
+  // TODO: Fix issue #11.
+  log("View.rect_for_export()")
+  var layer = this.layer
+  if (this.is_artboard()) {
+    return [[layer absoluteRect] rect]
+  } else {
+    return [layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]]
+  }
 }

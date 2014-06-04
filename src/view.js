@@ -4,7 +4,7 @@ function View(sketchLayer, parent){
   this.layer = sketchLayer
   this.parent = parent || null
   this.id = "" + [sketchLayer objectID]
-  this.name = "" + [sketchLayer name]
+  this.name = "" + [sketchLayer name].replace("/","-")
   this.visible = new Boolean([sketchLayer isVisible])
 }
 
@@ -13,9 +13,9 @@ View.prototype.image_path = function(){
   var view = this.layer,
       r = ""
   if(document_has_artboards()) {
-    r = "images/" + [[view parentArtboard] name] + "/" + [view name] + ".png"
+    r = "images/" + [[view parentArtboard] name] + "/" + this.name + ".png"
   } else {
-    r = "images/" + [view name] + ".png"
+    r = "images/" + this.name + ".png"
   }
   return r
 }

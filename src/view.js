@@ -1,11 +1,36 @@
 // View Class
+ViewCache = {
+  views: [],
+  get: function(id){
+    var v = this.views[id]
+    if(v != null) {
+      log("....Cache Hit :)")
+    }
+    return v
+  },
+  add: function(view){
+    var id = view.layer.objectID()
+    this.views[id] = view
+  }
+}
+
 function View(sketchLayer, parent){
-  log("new View("+sketchLayer+")")
+  var id = sketchLayer.objectID(),
+      cached_view = ViewCache.get(id)
+
+  if (cached_view != null) {
+    return cached_view
+  }
+
+  log("....new View("+sketchLayer+")")
   this.layer = sketchLayer
   this.parent = parent || null
   this.id = "" + [sketchLayer objectID]
   this.name = "" + [sketchLayer name].replace("/","-")
   this.visible = new Boolean([sketchLayer isVisible])
+
+  // Store reference in cache
+  ViewCache.add(this)
 }
 
 // Paths

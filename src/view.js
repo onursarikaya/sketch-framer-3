@@ -13,9 +13,9 @@ View.prototype.image_path = function(){
   var view = this.layer,
       r = ""
   if(document_has_artboards()) {
-    r = "images/" + [[view parentArtboard] name] + "/" + this.name + ".png"
+    r = "images/" + [[view parentArtboard] name] + "/" + this.clean_name() + ".png"
   } else {
-    r = "images/" + this.name + ".png"
+    r = "images/" + this.clean_name() + ".png"
   }
   return r
 }
@@ -30,7 +30,7 @@ View.prototype.folder_path = function(){
   return r
 }
 View.prototype.asset_path = function(){
-  var r = this.folder_path() + this.name + ".png"
+  var r = this.folder_path() + this.clean_name() + ".png"
   return r
 }
 
@@ -88,6 +88,10 @@ View.prototype.subviews = function(){
   } else {
     return null
   }
+}
+View.prototype.clean_name = function(){
+  var name = this.layer.name()
+  return name.replace(/[*\-+]$/g,"")
 }
 
 // Actions

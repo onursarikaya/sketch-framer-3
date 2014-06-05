@@ -133,7 +133,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   }
 
   // Does view have subviews?
-  if(view.has_subviews()){
+  if(view.has_subviews){
     log("......View has subviews")
     var subviews = view.subviews(),
         children_metadata = []

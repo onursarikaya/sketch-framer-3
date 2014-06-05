@@ -28,6 +28,9 @@ function View(sketchLayer, parent){
   this.id = "" + [sketchLayer objectID]
   this.name = "" + [sketchLayer name].replace("/","-")
   this.visible = new Boolean([sketchLayer isVisible])
+  this.exported_assets = 0
+  this.has_subviews = this.has_subviews()
+  log("......has_subviews: " + this.has_subviews)
 
   // Store reference in cache
   ViewCache.add(this)
@@ -81,11 +84,13 @@ View.prototype.name_ends_with = function(str){
   return this.name.slice(-1) === str
 }
 View.prototype.has_subviews = function(){
+  log("......has_subviews() — " + this.layer.className())
   if (this.do_not_traverse()) {
     return false
   }
-  var view = this.layer,
-      sublayers = [view layers]
+
+  var sublayers = this.layer.layers()
+
   for(var v=0; v < [sublayers count]; v++){
     var sublayer = new View([sublayers objectAtIndex:v])
     if(sublayer.should_be_extracted()){
@@ -284,7 +289,7 @@ View.prototype.export_assets = function(){
   var rect = this.rect_for_export()
 
   // Hide children if they will be exported individually
-  if(this.has_subviews()){
+  if(this.has_subviews){
     var sublayers = this.subviews(),
         hidden_children = []
 
@@ -315,7 +320,7 @@ View.prototype.export_assets = function(){
   }
 
   // Make sublayers visible again
-  if (this.has_subviews()) {
+  if (this.has_subviews) {
     for(var s=0; s < hidden_children.length; s++){
       var show_me = hidden_children[s]
       show_me.show()

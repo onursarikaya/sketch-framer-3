@@ -73,12 +73,26 @@ View.prototype.should_be_extracted = function(){
   if (this.should_be_ignored()) {
     return false
   }
-  r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || this.name_ends_with("+")
-  log(r)
+  r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || (this.name_ends_with("+") && this.has_subviews)
   return r
 }
 View.prototype.do_not_traverse = function(){
-  return this.name_ends_with("*")
+  // log("do_not_traverse — " + this.name + " (" + this.layer.children().count() + " children)")
+  // log("do_not_traverse — " + this.name + " (" + this.layer.layers().count() + " sublayers)")
+  if ( this.name_ends_with("*") || this.layer.className() == "MSShapeGroup" || this.layer.className() == "MSTextLayer" || this.layer.className() == "MSBitmapLayer" ) {
+    return true
+  }
+
+  /*
+    If this is a complex layer, we'd better flatten it. See #12, #16, #17
+    Some things we might want to take into account:
+    - nesting (deeply nested groups seem to crash Sketch more often)
+  */
+  if (this.layer.children().count() > 500){
+    return true
+  }
+
+  return false
 }
 View.prototype.name_ends_with = function(str){
   return this.name.slice(-1) === str
@@ -305,12 +319,13 @@ View.prototype.export_assets = function(){
   }
 
   // Actual writing of asset
+  // TODO: maybe use Exportable Layers?
   var filename = this.asset_path(),
       slice = [[MSSliceMaker slicesFromExportableLayer:view inRect:rect] firstObject]
   slice.page = [[doc currentPage] copyLightweight]
   slice.format = "png"
 
-  log("— writing asset " + slice + " to disk: " + filename)
+  // log("— writing asset " + slice + " to disk: " + filename)
   var imageData = [MSSliceExporter dataForRequest:slice]
   [imageData writeToFile:filename atomically:true]
 

@@ -51,6 +51,17 @@ When you're done, just hit `Ctrl + C` on the Terminal window to stop guard.
   - [x] **Shape/text layers** To export a shape or a text layer as a view, put it in a group, or append `+` to its name. Otherwise they will export as a background image.
   - [x] **Ignore** To ignore a layer, append `-` to its name. Example: `Ignored-`
   - [x] **Hidden layers** Hidden layers in Sketch will be exported as hidden layers in Framer. To show the layer in Framer, try `layer.visible = true`
-- [ ] **Masks** Native masks now work! You can also use Scroll in the name of a group that includes a mask to make that group scrollable. To scroll the layer in Framer, do `layer.scroll = true`
+- [x] **Masks** Native masks now work! You can also use Scroll in the name of a group that includes a mask to make that group scrollable. To scroll the layer in Framer, do `layer.scroll = true`
 - [ ] Fix artboard positions
 - [ ] Symbol support?
+- [ ] Issue #12 seems to be related with layer complexity
+- [x] Also, layers named just '+' are exported when they shouldn't (also, they seem to crash the script?)
+- [x] #15 Remove keywords (*/+) from layer name for easier access
+- [ ] #16 document crashes.
+   - I thought this was related to elapsed running time (timeouts, maybe?), but a basic, long running script works without a hitch.
+   - Maybe we could move back to export assets one by one?
+- [ ] #17 document crashes
+
+## Ideas / Future
+
+- [ ] Maybe add a preference panel where you can setup export options (specially if we end up flattening complex layers to avoid crashes)

@@ -77,10 +77,30 @@ View.prototype.should_be_extracted = function(){
   return r
 }
 View.prototype.do_not_traverse = function(){
-  // log("do_not_traverse — " + this.name + " (" + this.layer.children().count() + " children)")
-  // log("do_not_traverse — " + this.name + " (" + this.layer.layers().count() + " sublayers)")
-  if ( this.name_ends_with("*") || this.layer.className() == "MSShapeGroup" || this.layer.className() == "MSTextLayer" || this.layer.className() == "MSBitmapLayer" ) {
+  log("do_not_traverse() — " + this.name + " <" + this.layer.className() + ">" )
+
+  // First, check for explicit "Do not traverse" character in layer
+  if ( this.name_ends_with("*") ) {
+    log("Found * — Do not traverse")
     return true
+  }
+
+  // Second: check for some layer types we can't traverse, as they have no sublayers
+  if (this.layer.className() == "MSShapeGroup" || this.layer.className() == "MSTextLayer" || this.layer.className() == "MSBitmapLayer" ){
+    log("Found layer with no sublayers — Do not traverse")
+    return true
+  }
+
+  // Third: do not traverse Symbols, as they seem to break Sketch
+  if( this.layer.sharedObjectID() != null ){
+    log("Found Symbol — do not traverse")
+    return true
+  }
+
+  // Fourth: Artboards should always be traversed
+  if (this.is_artboard()){
+    log("Found Artboard — Traversing")
+    return false
   }
 
   /*
@@ -88,9 +108,10 @@ View.prototype.do_not_traverse = function(){
     Some things we might want to take into account:
     - nesting (deeply nested groups seem to crash Sketch more often)
   */
-  if (this.layer.children().count() > 500){
-    return true
-  }
+  // Fifth: if this is a complex layer, do not traverse it, as it will crash Sketch
+  // if (this.layer.layers().count() > 6){
+  //   return true
+  // }
 
   return false
 }
@@ -303,7 +324,7 @@ View.prototype.export_assets = function(){
   var rect = this.rect_for_export()
 
   // Hide children if they will be exported individually
-  if(this.has_subviews){
+  if(this.has_subviews && !this.do_not_traverse()){
     var sublayers = this.subviews(),
         hidden_children = []
 

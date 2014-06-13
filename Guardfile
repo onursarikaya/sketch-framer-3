@@ -2,7 +2,7 @@
 # More info at https://github.com/guard/guard#readme
 
 guard 'shell' do
-  watch(%r{src/.*}) {
+  watch(%r{src/.+js}) {
     system("rake")
     system("say installation complete")
     # system("rake run")

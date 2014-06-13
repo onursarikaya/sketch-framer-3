@@ -4,6 +4,13 @@
 
 This is the home of version 3 of the Sketch Framer plugin, for Sketch 3, to export to Framer 3. Yes, 3.0 is the new black.
 
+## Known Issues
+
+- **Complex documents will crash Sketch on export**. We're working to get that fixed, but meanwhile you can try these workarounds:
+  - Flatten complex layers, either by adding a `*` to the end of the layer name, or by converting them to bitmaps
+  - Split your document in multiple documents
+  - Delete layers you don't plan to use (or mark them as "Please ignore" by adding a `-` to the layer name)
+
 ## How-to
 
 Run this on the project folder to concatenate the multiple parts of the plugin into a single .sketchplugin file and install it into all known destinations (Sketch Release, Sketch Beta, Framer Generator):
@@ -61,6 +68,8 @@ When you're done, just hit `Ctrl + C` on the Terminal window to stop guard.
    - I thought this was related to elapsed running time (timeouts, maybe?), but a basic, long running script works without a hitch.
    - Maybe we could move back to export assets one by one?
 - [ ] #17 document crashes
+- [ ] #10 + keyword not working in bitmap layers
+- [ ] #10 * keyword not removed from JS name
 
 ## Ideas / Future
 

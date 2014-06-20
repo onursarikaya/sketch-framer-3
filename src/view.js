@@ -38,6 +38,7 @@ function View(sketchLayer, parent){
 
 // Paths
 View.prototype.image_path = function(){
+  // Relative path
   var view = this.layer,
       r = ""
   if(document_has_artboards()) {

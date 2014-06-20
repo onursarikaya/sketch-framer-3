@@ -216,7 +216,13 @@ View.prototype.ui_coordinates = function(){
   return ui
 }
 View.prototype.mask_bounds = function(){
-  // log("mask_bounds()")
+  log("mask_bounds("+this.layer+")")
+
+  if (this.layer.className() == "MSBitmapLayer") {
+    log("MSBitmapLayers have no masks")
+    return null
+  }
+
   var layer = this.layer,
       sublayers = [layer layers],
       effective_mask = null
@@ -245,6 +251,10 @@ View.prototype.mask_bounds = function(){
   }
 }
 View.prototype.disable_mask = function(){
+  if (this.layer.className() == "MSBitmapLayer") {
+    return
+  }
+
   var view = this.layer,
       masklayers = [view layers],
       effective_mask = null
@@ -273,6 +283,9 @@ View.prototype.disable_mask = function(){
   [view resizeRoot]
 }
 View.prototype.enable_mask = function(){
+  if (this.layer.className() == "MSBitmapLayer") {
+    return
+  }
   var view = this.layer,
       masklayers = [view layers]
 

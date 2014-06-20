@@ -311,8 +311,13 @@ View.prototype.show = function(){
   this.visible = true
 }
 View.prototype.export_assets = function(){
+  log("View.export_assets() — " + this.name)
+
   if (DRY_RUN) {
     log("DRY_RUN, won't export assets")
+    return
+  }
+  if (this.should_be_ignored()) {
     return
   }
 

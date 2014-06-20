@@ -27,10 +27,10 @@ if(error) { // Stop execution and display error
     }
   })
 
-  // views = nil;
-  // ViewsMetadata = nil;
-  // error = nil;
-  // TODO: cleanup stuff here?
+  views = null
+  ViewsMetadata = null
+  ViewCache = null
+  error = null
 
   log("— Export complete in " + (new Date() - start_time) + "ms")
   [doc showMessage:"Export Complete"]

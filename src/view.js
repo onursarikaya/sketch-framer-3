@@ -70,10 +70,13 @@ View.prototype.should_be_ignored = function() {
   return this.name_ends_with("-")
 }
 View.prototype.should_be_extracted = function(){
+  log("View.should_be_extracted("+this.layer.name()+")")
   if (this.should_be_ignored()) {
     return false
   }
-  r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || (this.name_ends_with("+") && this.has_subviews)
+  // r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || (this.name_ends_with("+") && this.has_subviews)
+  r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || this.name_ends_with("+")
+  log(r)
   return r
 }
 View.prototype.do_not_traverse = function(){

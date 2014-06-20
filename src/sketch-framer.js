@@ -117,11 +117,13 @@ MetadataExtractor.prototype.getJSON = function(){
 MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   log("....MetadataExtractor.extract_metadata_from_view(" + view.name + ")")
 
+  // TODO: see #11. This fixes the frame size, but not the exported image padding issue
+  // var layerFrame = view.ui_coordinates()
   var layerFrame = view.coordinates()
 
   var metadata = {
     id: view.id,
-    name: view.name,
+    name: view.name_without_keywords(),
     maskFrame: view.mask_bounds(),
     layerFrame: layerFrame,
     image: {

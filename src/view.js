@@ -154,6 +154,9 @@ View.prototype.subviews = function(){
     return null
   }
 }
+View.prototype.name_without_keywords = function(){
+  return this.layer.name().replace(/[*\-+]$/g,"")
+}
 View.prototype.clean_name = function(){
   var name = this.layer.name()
   return name.replace(/[*\-+]$/g,"")

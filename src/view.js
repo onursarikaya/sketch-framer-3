@@ -119,6 +119,7 @@ View.prototype.do_not_traverse = function(){
 
   return false
 }
+
 View.prototype.name_ends_with = function(str){
   return this.name.slice(-1) === str
 }
@@ -162,8 +163,24 @@ View.prototype.name_without_keywords = function(){
   return this.layer.name().replace(/[*\-+]$/g,"")
 }
 View.prototype.clean_name = function(){
-  var name = this.layer.name()
-  return name.replace(/[*\-+]$/g,"")
+  log("View.clean_name("+this.layer.name()+")")
+  var p = this.layer.currentPage(),
+      ancestors = p.ancestorsOfLayer(this.layer),
+      route = []
+
+  if (this.is_artboard()) {
+    return this.name_without_keywords()
+  }
+  // We start at index 1 because 0 is the page and we're not interested in it
+  for (var i=1; i < [ancestors count]; i++) {
+    var a = [ancestors objectAtIndex:i]
+    if (a.className() != "MSArtboardGroup") {
+      // We only want to push layers, not artboards, as we take care of
+      // artboards in folder_path() and image_path()
+      route.push(a.name().replace(/[*\-+]$/g,"").replace(/ /g,"_").toLowerCase())
+    }
+  }
+  return route.join("-")
 }
 
 // Actions

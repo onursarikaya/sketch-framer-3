@@ -367,7 +367,7 @@ View.prototype.export_assets = function(){
         hidden_children = []
     for (var s = 0; s < sublayers.length; s++) {
       var sublayer = sublayers[s]
-      // TODO: REENABLE THIS: sublayer.export_assets()
+      sublayer.export_assets()
       if (sublayer.layer.isVisible) {
         log("......We should hide " + sublayer.name + ", as it will be exported individually")
         sublayer.hide()

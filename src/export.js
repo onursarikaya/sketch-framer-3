@@ -25,6 +25,18 @@ if(error) { // Stop execution and display error
       var view = views[v]
       view.export_assets()
     }
+    // Loop again, let's see how this works...
+    for (var v = 0; v < views.length; v++) {
+      var view = views[v]
+      if (view.has_subviews) {
+        log("..Now let's export " + view.name + " subviews:")
+        var sublayers = view.subviews
+        for (var s = 0; s < sublayers.length; s++) {
+          var sublayer = sublayers[s]
+          sublayer.export_assets()
+        }
+      }
+    }
   })
 
   views = null

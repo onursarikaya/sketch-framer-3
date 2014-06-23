@@ -39,6 +39,7 @@ function View(sketchLayer, parent){
   this.rect = this.rect_for_export()
   this.clean_name = this.clean_name()
 
+  make_folder(this.folder_path())
   // Store reference in cache
   ViewCache.add(this)
 }
@@ -101,45 +102,34 @@ View.prototype.should_be_extracted = function(){
 View.prototype.do_not_traverse = function(){
   log("..do_not_traverse() — " + this.name + " <" + this.layer.className() + ">" )
 
-  // First, check for explicit "Do not traverse" character in layer
+  // Check for explicit "Do not traverse" character in layer
   if ( this.name_ends_with("*") ) {
     log("....Found * — Do not traverse")
     return true
   }
+  // Check for some layer types we can't traverse, as they have no sublayers
+  if (this.layer.className() == "MSShapeGroup" || this.layer.className() == "MSTextLayer" || this.layer.className() == "MSBitmapLayer" ){
+    log("....Found layer with no sublayers — Do not traverse")
+    return true
+  }
+  // Do not traverse Symbols, as they seem to break Sketch
+  if( this.layer.sharedObjectID() != null ){
+    log("....Found Symbol — do not traverse")
+    return true
+  }
+  // Check: if this is a deeply nested layer, do not traverse it, as it will crash Sketch
+  // if (this.nest_level() >= 2){
+  //   return true
+  // }
 
   if (this.layer.className() == "MSLayerGroup") {
     log("....LayerGroup — Traversing")
     return false
   }
-
-  // Second: check for some layer types we can't traverse, as they have no sublayers
-  if (this.layer.className() == "MSShapeGroup" || this.layer.className() == "MSTextLayer" || this.layer.className() == "MSBitmapLayer" ){
-    log("....Found layer with no sublayers — Do not traverse")
-    return true
-  }
-
-  // Third: do not traverse Symbols, as they seem to break Sketch
-  if( this.layer.sharedObjectID() != null ){
-    log("....Found Symbol — do not traverse")
-    return true
-  }
-
-  // Fourth: Artboards should always be traversed
   if (this.is_artboard()){
     log("....Found Artboard — Traversing")
     return false
   }
-
-  /*
-    If this is a complex layer, we'd better flatten it. See #12, #16, #17
-    Some things we might want to take into account:
-    - nesting (deeply nested groups seem to crash Sketch more often)
-  */
-  // Fifth: if this is a complex layer, do not traverse it, as it will crash Sketch
-  // if (this.layer.layers().count() > 6){
-  //   return true
-  // }
-
   return false
 }
 
@@ -338,33 +328,29 @@ View.prototype.show = function(){
   this.visible = true
 }
 View.prototype.export_assets = function(){
-  log("View.export_assets() — " + this.name)
+  log("..View.export_assets() — " + this.name)
 
   if (DRY_RUN) {
-    log("DRY_RUN, won't export assets")
+    log("....DRY_RUN is true — Don't export")
     return
   }
   if (this.should_be_ignored()) {
+    log("....should_be_ignored is TRUE — Don't export")
     return
   }
 
   var view = this.layer
-
-  make_folder(this.folder_path())
 
   if (document_has_artboards()) {
     var current_artboard = [view parentArtboard],
         current_artboard_name = [current_artboard name],
         did_disable_background = false
 
-    if([current_artboard includeBackgroundColorInExport]){
-      // print("Artboard has a background color set to export")
-      if(!this.is_artboard()){
-        // disable the background color if we're not exporting the actual artboard
-        // print(" so we'll momentarily disable it")
-        [current_artboard setIncludeBackgroundColorInExport:false]
-        did_disable_background = true
-      }
+    if([current_artboard includeBackgroundColorInExport] && !this.is_artboard()){
+      // disable the background color if we're not exporting the actual artboard
+      log("....disabling artboard background color for export")
+      [current_artboard setIncludeBackgroundColorInExport:false]
+      did_disable_background = true
     }
   }
 
@@ -376,14 +362,14 @@ View.prototype.export_assets = function(){
 
   // Hide children if they will be exported individually
   if(this.has_subviews && !this.do_not_traverse){
+    log("....hiding subviews")
     var sublayers = this.subviews,
         hidden_children = []
-
     for (var s = 0; s < sublayers.length; s++) {
       var sublayer = sublayers[s]
-      sublayer.export_assets()
+      // TODO: REENABLE THIS: sublayer.export_assets()
       if (sublayer.layer.isVisible) {
-        // print("We should hide " + [sublayer name] + ", as it will be exported individually")
+        log("......We should hide " + sublayer.name + ", as it will be exported individually")
         sublayer.hide()
         hidden_children.push(sublayer)
       }
@@ -397,17 +383,17 @@ View.prototype.export_assets = function(){
   slice.page = [[doc currentPage] copyLightweight]
   slice.format = "png"
 
-  // log("— writing asset " + slice + " to disk: " + filename)
+  log("....writing asset " + slice + " to disk: " + filename)
   var imageData = [MSSliceExporter dataForRequest:slice]
   [imageData writeToFile:filename atomically:true]
 
-  // Restore background color for layer
   if(current_artboard != null && did_disable_background){
+    log("....reenabling background color for artboard")
     [current_artboard setIncludeBackgroundColorInExport:true]
   }
 
-  // Make sublayers visible again
   if (this.has_subviews) {
+    log("....Making sublayers visible again")
     for(var s=0; s < hidden_children.length; s++){
       var show_me = hidden_children[s]
       show_me.show()
@@ -431,4 +417,8 @@ View.prototype.rect_for_export = function(){
   } else {
     return [layer rectByAccountingForStyleSize:[[layer absoluteRect] rect]]
   }
+}
+
+View.prototype.nest_level = function(){
+  return this.layer.currentPage().ancestorsOfLayer(this.layer).length()
 }

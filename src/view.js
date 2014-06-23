@@ -37,6 +37,7 @@ function View(sketchLayer, parent){
   this.do_not_traverse = this.do_not_traverse()
   this.mask_bounds = this.mask_bounds()
   this.rect = this.rect_for_export()
+  this.clean_name = this.clean_name()
 
   // Store reference in cache
   ViewCache.add(this)
@@ -48,9 +49,9 @@ View.prototype.image_path = function(){
   var view = this.layer,
       r = ""
   if(document_has_artboards()) {
-    r = "images/" + [[view parentArtboard] name] + "/" + this.clean_name() + ".png"
+    r = "images/" + [[view parentArtboard] name] + "/" + this.clean_name + ".png"
   } else {
-    r = "images/" + this.clean_name() + ".png"
+    r = "images/" + this.clean_name + ".png"
   }
   return r
 }
@@ -65,7 +66,7 @@ View.prototype.folder_path = function(){
   return r
 }
 View.prototype.asset_path = function(){
-  var r = this.folder_path() + this.clean_name() + ".png"
+  var r = this.folder_path() + this.clean_name + ".png"
   return r
 }
 
@@ -181,24 +182,6 @@ View.prototype.name_without_keywords = function(){
 }
 View.prototype.clean_name = function(){
   return this.id
-  // log("View.clean_name("+this.layer.name()+")")
-  // var p = this.layer.currentPage(),
-  //     ancestors = p.ancestorsOfLayer(this.layer),
-  //     route = []
-  //
-  // if (this.is_artboard()) {
-  //   return this.name_without_keywords()
-  // }
-  // // We start at index 1 because 0 is the page and we're not interested in it
-  // for (var i=1; i < [ancestors count]; i++) {
-  //   var a = [ancestors objectAtIndex:i]
-  //   if (a.className() != "MSArtboardGroup") {
-  //     // We only want to push layers, not artboards, as we take care of
-  //     // artboards in folder_path() and image_path()
-  //     route.push(a.name().replace(/[*\-+]$/g,"").replace(/ /g,"_").toLowerCase())
-  //   }
-  // }
-  // return route.join("-")
 }
 
 // Actions

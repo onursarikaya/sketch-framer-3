@@ -29,12 +29,12 @@ function View(sketchLayer, parent){
   this.name = "" + [sketchLayer name].replace("/","-")
   this.visible = new Boolean([sketchLayer isVisible])
   this.exported_assets = 0
+  this.do_not_traverse = this.do_not_traverse()
   this.has_subviews = this.has_subviews()
   if (this.has_subviews) {
     this.subviews = this.subviews()
   }
   this.should_be_extracted = this.should_be_extracted()
-  this.do_not_traverse = this.do_not_traverse()
   this.mask_bounds = this.mask_bounds()
   this.rect = this.rect_for_export()
   this.clean_name = this.clean_name()
@@ -99,29 +99,34 @@ View.prototype.should_be_extracted = function(){
   return false
 }
 View.prototype.do_not_traverse = function(){
-  log("do_not_traverse() — " + this.name + " <" + this.layer.className() + ">" )
+  log("..do_not_traverse() — " + this.name + " <" + this.layer.className() + ">" )
 
   // First, check for explicit "Do not traverse" character in layer
   if ( this.name_ends_with("*") ) {
-    log("Found * — Do not traverse")
+    log("....Found * — Do not traverse")
     return true
+  }
+
+  if (this.layer.className() == "MSLayerGroup") {
+    log("....LayerGroup — Traversing")
+    return false
   }
 
   // Second: check for some layer types we can't traverse, as they have no sublayers
   if (this.layer.className() == "MSShapeGroup" || this.layer.className() == "MSTextLayer" || this.layer.className() == "MSBitmapLayer" ){
-    log("Found layer with no sublayers — Do not traverse")
+    log("....Found layer with no sublayers — Do not traverse")
     return true
   }
 
   // Third: do not traverse Symbols, as they seem to break Sketch
   if( this.layer.sharedObjectID() != null ){
-    log("Found Symbol — do not traverse")
+    log("....Found Symbol — do not traverse")
     return true
   }
 
   // Fourth: Artboards should always be traversed
   if (this.is_artboard()){
-    log("Found Artboard — Traversing")
+    log("....Found Artboard — Traversing")
     return false
   }
 
@@ -143,7 +148,10 @@ View.prototype.name_ends_with = function(str){
 }
 View.prototype.has_subviews = function(){
   log("......has_subviews() — " + this.layer.className())
+
+  log(this.do_not_traverse)
   if (this.do_not_traverse) {
+    log("........do_not_traverse is TRUE")
     return false
   }
 

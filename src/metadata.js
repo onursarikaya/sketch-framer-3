@@ -23,7 +23,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   var metadata = {
     id: view.id,
     name: view.name_without_keywords(),
-    maskFrame: view.mask_bounds(),
+    maskFrame: view.mask_bounds,
     layerFrame: layerFrame,
     image: {
       path: view.image_path(),
@@ -36,7 +36,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
   // Does view have subviews?
   if(view.has_subviews){
     log("......View has subviews")
-    var subviews = view.subviews(),
+    var subviews = view.subviews,
         children_metadata = []
 
     // Traverse views in reverse order (see #7)
@@ -99,7 +99,7 @@ MetadataExtractor.prototype.extract_views_from_document = function(){
   // Traverse views in reverse order (see #7)
   for (var i = [everything count] - 1; i >= 0; i--) {
     var view = new View([everything objectAtIndex:i])
-    if (view.should_be_extracted()) {
+    if (view.should_be_extracted) {
       views.push(view)
     }
   }

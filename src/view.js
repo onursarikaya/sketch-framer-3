@@ -30,7 +30,13 @@ function View(sketchLayer, parent){
   this.visible = new Boolean([sketchLayer isVisible])
   this.exported_assets = 0
   this.has_subviews = this.has_subviews()
-  log("......has_subviews: " + this.has_subviews)
+  if (this.has_subviews) {
+    this.subviews = this.subviews()
+  }
+  this.should_be_extracted = this.should_be_extracted()
+  this.do_not_traverse = this.do_not_traverse()
+  this.mask_bounds = this.mask_bounds()
+  this.rect = this.rect_for_export()
 
   // Store reference in cache
   ViewCache.add(this)
@@ -73,12 +79,23 @@ View.prototype.should_be_ignored = function() {
 View.prototype.should_be_extracted = function(){
   log("View.should_be_extracted("+this.layer.name()+")")
   if (this.should_be_ignored()) {
+    log("..nope, this view should be ignored")
     return false
   }
-  // r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || (this.name_ends_with("+") && this.has_subviews)
-  r = this.layer.className() == "MSLayerGroup" || this.is_artboard() || this.name_ends_with("+")
-  log(r)
-  return r
+  if (this.is_artboard()){
+    log("..yes, view is an artboard so it will be extracted")
+    return true
+  }
+  if (this.layer.className() == "MSLayerGroup") {
+    log("..yes, this view will be extracted")
+    return true
+  }
+  if ( this.name_ends_with("+") && this.has_subviews ) {
+    log("..yes, this view will be extracted because it ends with +")
+    return true
+  }
+  log("..nope, apparently this view shouldn't be extracted")
+  return false
 }
 View.prototype.do_not_traverse = function(){
   log("do_not_traverse() — " + this.name + " <" + this.layer.className() + ">" )
@@ -125,7 +142,7 @@ View.prototype.name_ends_with = function(str){
 }
 View.prototype.has_subviews = function(){
   log("......has_subviews() — " + this.layer.className())
-  if (this.do_not_traverse()) {
+  if (this.do_not_traverse) {
     return false
   }
 
@@ -133,7 +150,7 @@ View.prototype.has_subviews = function(){
 
   for(var v=0; v < [sublayers count]; v++){
     var sublayer = new View([sublayers objectAtIndex:v])
-    if(sublayer.should_be_extracted()){
+    if(sublayer.should_be_extracted){
       return true
     }
   }
@@ -149,7 +166,7 @@ View.prototype.subviews = function(){
   for(var v=0; v < [sublayers count]; v++){
     var sublayer = new View([sublayers objectAtIndex:v])
     // log("sublayer" + JSON.stringify(sublayer))
-    if(sublayer.should_be_extracted()){
+    if(sublayer.should_be_extracted){
       subviews.push(sublayer)
     }
   }
@@ -237,7 +254,7 @@ View.prototype.ui_coordinates = function(){
 View.prototype.mask_bounds = function(){
   log("mask_bounds("+this.layer+")")
 
-  if (this.layer.className() == "MSBitmapLayer") {
+  if (this.layer.className() == "MSBitmapLayer" || !this.has_subviews) {
     log("MSBitmapLayers have no masks")
     return null
   }
@@ -270,7 +287,7 @@ View.prototype.mask_bounds = function(){
   }
 }
 View.prototype.disable_mask = function(){
-  if (this.layer.className() == "MSBitmapLayer") {
+  if (this.layer.className() == "MSBitmapLayer" || !this.has_subviews) {
     return
   }
 
@@ -302,7 +319,7 @@ View.prototype.disable_mask = function(){
   [view resizeRoot]
 }
 View.prototype.enable_mask = function(){
-  if (this.layer.className() == "MSBitmapLayer") {
+  if (this.layer.className() == "MSBitmapLayer" || !this.has_subviews) {
     return
   }
   var view = this.layer,
@@ -364,11 +381,11 @@ View.prototype.export_assets = function(){
   this.disable_mask()
 
   // Get frame dimensions before hiding children
-  var rect = this.rect_for_export()
+  var rect = this.rect
 
   // Hide children if they will be exported individually
-  if(this.has_subviews && !this.do_not_traverse()){
-    var sublayers = this.subviews(),
+  if(this.has_subviews && !this.do_not_traverse){
+    var sublayers = this.subviews,
         hidden_children = []
 
     for (var s = 0; s < sublayers.length; s++) {
@@ -407,6 +424,11 @@ View.prototype.export_assets = function(){
   }
 
   this.enable_mask()
+
+  // GC
+  imageData = null
+  slice = null
+  rect = null
 }
 
 View.prototype.rect_for_export = function(){

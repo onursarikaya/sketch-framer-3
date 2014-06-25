@@ -22,7 +22,7 @@ MetadataExtractor.prototype.extract_metadata_from_view = function(view){
 
   var metadata = {
     id: view.id,
-    name: view.name_without_keywords(),
+    name: view.name_without_keywords().replace(/[-+!?:*\[\]\(\)\/]/g,"").trim().replace(/\s/g,"_"),
     maskFrame: view.mask_bounds,
     layerFrame: layerFrame,
     image: {

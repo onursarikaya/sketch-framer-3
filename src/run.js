@@ -5,7 +5,7 @@ var sketchVersion = 0;
 var bundles = [NSBundle allBundles]
 for (var i = 0; i < [bundles count]; i++) {
   var bundle = [bundles objectAtIndex:i]
-  if([bundle resourcePath].indexOf("Sketch")) {
+  if([bundle resourcePath].indexOf("Sketch") != -1) {
     sketchVersion = 0 + parseInt([bundle infoDictionary]["CFBundleVersion"]);
   }
 }

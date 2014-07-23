@@ -1,5 +1,7 @@
-var sketchApp = [COScript app:"Sketch Beta"];
+var sketchApp;
+
 sketchApp = sketchApp || [COScript app:"Sketch"];
+sketchApp = sketchApp || [COScript app:"Sketch Beta"];
 
 var sketchVersion = 0;
 var bundles = [NSBundle allBundles]

@@ -1,7 +1,14 @@
 var sketchApp;
 
-sketchApp = sketchApp || [COScript app:"Sketch"];
-sketchApp = sketchApp || [COScript app:"Sketch Beta"];
+function runningApp(identifier) {
+	return [[NSRunningApplication runningApplicationsWithBundleIdentifier:identifier] firstObject];
+}
+
+if (runningApp("com.bohemiancoding.sketch3")) {
+	sketchApp = [COScript app:"Sketch"];
+} else if (runningApp("com.bohemiancoding.sketch3.beta")) {
+	sketchApp = [COScript app:"Sketch Beta"]
+}
 
 var sketchVersion = 0;
 var bundles = [NSBundle allBundles]

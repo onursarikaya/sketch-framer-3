@@ -8,10 +8,12 @@ import subprocess
 tempPathPrefix = "TEMP_DIR:"
 
 
-if len(sys.argv) < 2:
-	sys.exit("Usage run.py <path>")
+if len(sys.argv) < 3:
+	sys.exit("Usage run.py <path> <identifier>")
 
 outPath = os.path.normpath(sys.argv[1])
+appIdentifier = os.path.normpath(sys.argv[2])
+
 path = os.path.dirname(__file__)
 
 print "Writing project to '%s'" % outPath
@@ -33,7 +35,7 @@ def applescript(input):
 def sendToTrash(path):
 	applescript('tell application "Finder" to delete POSIX file "%s"' % path)
 
-output = run("./coscript run.js")
+output = run("./coscript run.js %s" % appIdentifier)
 tempPath = getTempPathFromOutput(output)
 
 print output

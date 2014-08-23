@@ -4,10 +4,15 @@ function runningApp(identifier) {
 	return [[NSRunningApplication runningApplicationsWithBundleIdentifier:identifier] firstObject];
 }
 
-if (runningApp("com.bohemiancoding.sketch3")) {
-	sketchApp = [COScript app:"Sketch"];
-} else if (runningApp("com.bohemiancoding.sketch3.beta")) {
-	sketchApp = [COScript app:"Sketch Beta"]
+var args = [[NSProcessInfo processInfo] arguments];
+var appIdentifier = args[2];
+
+NSLog("framersketch running for %@", appIdentifier);
+
+if (appIdentifier == "com.bohemiancoding.sketch3.beta") {
+  sketchApp = [COScript app:"Sketch Beta"];
+} else {
+  sketchApp = [COScript app:"Sketch"];
 }
 
 var sketchVersion = 0;
